@@ -50,22 +50,78 @@ class linear_relation_extractor:
     def extract_valid_triplets(self):
         result = []
         for triplet in self.relations_triplets:
-            if self.relation_contains_verb(triplet['relation']) and (not self.triplet['subject']) and (not self.triplet['object']) :
+            if self.relation_contains_verb(triplet['relation']) and (triplet['subject']) and (triplet['object']):
                 result.append(triplet)
         self.relations_triplets = result
         return result
-
 
     def relation_contains_verb(self, relation):
         for token in relation:
             if token.pos_ == "VERB":
                 return True
         return False
-extractor = linear_relation_extractor()
-for token in analyzed_page:
-    extractor.step(token)
-result = extractor.extract_valid_triplets()
 
-for triplet in result:
+
+extractor = linear_relation_extractor()
+
+
+# for token in analyzed_page:
+#     extractor.step(token)
+# result = extractor.extract_valid_triplets()
+#
+# for triplet in result:
+#     print("----------------")
+#     print(triplet)
+
+class tree_relation_extractor:
+    relations_triplets = []
+    prop_noun_set = set()
+
+    # insert all triplets in the sentence to the relation_triplets list
+    def parse_sentence(self, sentence):
+        heads = self.extract_heads(sentence)
+        for head1 in heads:
+            for head2 in heads:
+                triplet = self.check_condition_1(head1, head2)
+                if not triplet:
+                    triplet = self.check_condition_2(head1, head2)
+                if triplet:
+                    self.relations_triplets.append(triplet)
+
+    # return all prpn-heads in the sentence as a list
+    def extract_heads(self, sent):
+        heads = []
+        for token in sent:
+            if token.pos_ == 'PROPN' and not token.dep_ == 'compound':
+                heads.append(token)
+        return heads
+
+    # if condition is true, return the triplet (without the full prpn, just heads)
+    # else return None
+    def check_condition_1(self, token1, token2):
+        if token1.head == token2.head and token1.dep_ == "nsubj" and token2.dep_ == "dobj":
+            triplet = {'subject': [token1], 'relation': [token2.head], 'object': [token2]}
+            return triplet
+        return None
+
+    # if condition is true, return the triplet (without the full prpn, just heads)
+    # else return None
+    def check_condition_2(self, token1, token2):
+        if token1.head == token2.head.head and token1.dep_ == "nsubj" and token2.dep_ == "prep" and token2.head.dep_ == "pobj":
+            triplet = {'subject': [token1], 'relation': [token2.head.head, token2.head], 'object': [token2]}
+            return triplet
+        return None
+
+    # iterate over all triplets and add the children of the propn-head. return the triplet list
+    def extract_all_children(self):
+        print("TBD")
+        return None
+
+tree_extractor=tree_relation_extractor()
+for sent in analyzed_page.sents:
+    tree_extractor.parse_sentence(sent)
+result2=tree_extractor.relations_triplets
+
+for triplet in result2:
     print("----------------")
     print(triplet)
