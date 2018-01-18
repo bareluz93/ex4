@@ -65,17 +65,18 @@ class linear_relation_extractor:
 extractor = linear_relation_extractor()
 
 
-# for token in analyzed_page:
-#     extractor.step(token)
-# result = extractor.extract_valid_triplets()
-#
-# for triplet in result:
-#     print("----------------")
-#     print(triplet)
+for token in analyzed_page:
+    extractor.step(token)
+result = extractor.extract_valid_triplets()
+
+for triplet in result:
+    print("----------------")
+    print(triplet)
+print(len(result))
 
 class tree_relation_extractor:
     relations_triplets = []
-    prop_noun_set = set()
+    heads_set = set()
 
     # insert all triplets in the sentence to the relation_triplets list
     def parse_sentence(self, sentence):
@@ -94,6 +95,7 @@ class tree_relation_extractor:
         for token in sent:
             if token.pos_ == 'PROPN' and not token.dep_ == 'compound':
                 heads.append(token)
+                self.heads_set.add(token)
         return heads
 
     # if condition is true, return the triplet (without the full prpn, just heads)
@@ -107,21 +109,36 @@ class tree_relation_extractor:
     # if condition is true, return the triplet (without the full prpn, just heads)
     # else return None
     def check_condition_2(self, token1, token2):
-        if token1.head == token2.head.head and token1.dep_ == "nsubj" and token2.dep_ == "prep" and token2.head.dep_ == "pobj":
+        if token1.head == token2.head.head and token1.dep_ == "nsubj" and token2.dep_ == "pobj" and token2.head.dep_ == "prep" :
             triplet = {'subject': [token1], 'relation': [token2.head.head, token2.head], 'object': [token2]}
             return triplet
         return None
 
     # iterate over all triplets and add the children of the propn-head. return the triplet list
     def extract_all_children(self):
-        print("TBD")
-        return None
+        for triplet in self.relations_triplets:
+            cur_subj=triplet['subject'][0]
+            cur_obj=triplet['object'][0]
+            for child1,child2 in zip(cur_subj.children,cur_obj.children):
+                if child1.dep_== 'compound':
+                    triplet['subject'].append(child1)
+                if child2.dep_== 'compound':
+                    triplet['object'].append(child2)
 
 tree_extractor=tree_relation_extractor()
 for sent in analyzed_page.sents:
     tree_extractor.parse_sentence(sent)
+tree_extractor.extract_all_children()
 result2=tree_extractor.relations_triplets
 
-for triplet in result2:
-    print("----------------")
-    print(triplet)
+# for triplet in result2:
+#     print("----------------")
+#     print(triplet)
+# print(len(result2))
+
+# for sent in analyzed_page.sents:
+#     print(sent)
+# print("..................................")
+# for token in analyzed_page:
+#     print(token.text, token.dep_, token.head.text, token.head.pos_,
+#           [child for child in token.children])
