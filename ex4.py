@@ -1,8 +1,7 @@
 import wikipedia, spacy, copy
 
 nlp_model = spacy.load('en')
-page = wikipedia.page('Brad Pitt').content
-analyzed_page = nlp_model(page)
+
 
 
 # for token in analyzed_page:
@@ -61,18 +60,18 @@ class linear_relation_extractor:
                 return True
         return False
 
+    # evaluate linear extractor
+    def evaluate(self,analyzed_page,name):
+        for token in analyzed_page:
+            self.step(token)
+        result = self.extract_valid_triplets()
 
-extractor = linear_relation_extractor()
+        for triplet in result[:10]:
+            print("----------------")
+            print(triplet)
+        print('num of triplets in the linear extractor of ' + name + " page = " + str(len(result)))
 
 
-for token in analyzed_page:
-    extractor.step(token)
-result = extractor.extract_valid_triplets()
-
-for triplet in result:
-    print("----------------")
-    print(triplet)
-print(len(result))
 
 class tree_relation_extractor:
     relations_triplets = []
@@ -124,21 +123,34 @@ class tree_relation_extractor:
                     triplet['subject'].append(child1)
                 if child2.dep_== 'compound':
                     triplet['object'].append(child2)
+    def evaluate(self,sents,name):
+        for sent in sents:
+            self.parse_sentence(sent)
+        self.extract_all_children()
 
-tree_extractor=tree_relation_extractor()
-for sent in analyzed_page.sents:
-    tree_extractor.parse_sentence(sent)
-tree_extractor.extract_all_children()
-result2=tree_extractor.relations_triplets
+        for triplet in self.relations_triplets[:10]:
+            print("----------------")
+            print(triplet)
+        print('num of triplets in the tree extractor of ' + name + " page = " + str(len(self.relations_triplets)))
 
-# for triplet in result2:
-#     print("----------------")
-#     print(triplet)
-# print(len(result2))
 
-# for sent in analyzed_page.sents:
-#     print(sent)
-# print("..................................")
-# for token in analyzed_page:
-#     print(token.text, token.dep_, token.head.text, token.head.pos_,
-#           [child for child in token.children])
+if __name__ == '__main__':
+    pages_names=['Brad Pitt','Donald Trump','Angelina Jolie']
+    for name in pages_names:
+        print('********************************************************')
+        page = wikipedia.page(name).content
+        # print(page)
+        analyzed_page = nlp_model(page)
+        # print(analyzed_page)
+
+        tree_extractor = tree_relation_extractor()
+        linear_extractor = linear_relation_extractor()
+
+        linear_extractor.evaluate(analyzed_page,name)
+        print('********************************************************')
+        tree_extractor.evaluate(analyzed_page.sents,name)
+
+
+
+
+
