@@ -8,6 +8,9 @@ analyzed_page = nlp_model(page)
 # for token in analyzed_page:
 #     print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
 #           token.shape_, token.is_alpha, token.is_stop)
+for token in analyzed_page:
+    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
+          token.shape_, token.is_alpha, token.is_stop)
 
 
 class linear_relation_extractor:
@@ -66,7 +69,7 @@ for token in analyzed_page:
     extractor.step(token)
 result = extractor.extract_valid_triplets()
 
-for i in range(len(analyzed_page)):
+for i in range(3):
     triplet = result[i]
     print("-------i = "+str(i))
     print(triplet)
