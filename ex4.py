@@ -10,11 +10,12 @@ nlp_model = spacy.load('en')
 
 
 class linear_relation_extractor:
-    last_token_was_propnoun = False
+    def __init__(self):
+        self.last_token_was_propnoun = False
 
-    relations_triplets = []
-    prop_noun_set = set()
-    triplet = {'subject': [], 'relation': [], 'object': []}
+        self.relations_triplets = []
+        self.prop_noun_set = set()
+        self.triplet = {'subject': [], 'relation': [], 'object': []}
 
     def step(self, token):
         if token.pos_ == "PROPN":
@@ -74,8 +75,9 @@ class linear_relation_extractor:
 
 
 class tree_relation_extractor:
-    relations_triplets = []
-    heads_set = set()
+    def __init__(self):
+        self.relations_triplets = []
+        self.heads_set = set()
 
     # insert all triplets in the sentence to the relation_triplets list
     def parse_sentence(self, sentence):
@@ -139,9 +141,7 @@ if __name__ == '__main__':
     for name in pages_names:
         print('********************************************************')
         page = wikipedia.page(name).content
-        # print(page)
         analyzed_page = nlp_model(page)
-        # print(analyzed_page)
 
         tree_extractor = tree_relation_extractor()
         linear_extractor = linear_relation_extractor()
