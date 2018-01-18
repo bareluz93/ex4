@@ -118,13 +118,17 @@ class tree_relation_extractor:
     # iterate over all triplets and add the children of the propn-head. return the triplet list
     def extract_all_children(self):
         for triplet in self.relations_triplets:
+
             cur_subj=triplet['subject'][0]
-            cur_obj=triplet['object'][0]
-            for child1,child2 in zip(cur_subj.children,cur_obj.children):
-                if child1.dep_== 'compound':
-                    triplet['subject'].append(child1)
-                if child2.dep_== 'compound':
-                    triplet['object'].append(child2)
+            for child in cur_subj.children:
+                if child.dep_ == 'compound':
+                    triplet['subject'].append(child)
+
+            cur_obj = triplet['object'][0]
+            for child in cur_obj.children:
+                if child.dep_ == 'compound':
+                    triplet['object'].append(child)
+
     def evaluate(self,sents,name):
         for sent in sents:
             self.parse_sentence(sent)
