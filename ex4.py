@@ -8,9 +8,6 @@ analyzed_page = nlp_model(page)
 # for token in analyzed_page:
 #     print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
 #           token.shape_, token.is_alpha, token.is_stop)
-for token in analyzed_page:
-    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-          token.shape_, token.is_alpha, token.is_stop)
 
 
 class linear_relation_extractor:
@@ -53,7 +50,7 @@ class linear_relation_extractor:
     def extract_valid_triplets(self):
         result = []
         for triplet in self.relations_triplets:
-            if self.relation_contains_verb(triplet['relation']):
+            if self.relation_contains_verb(triplet['relation']) and (not self.triplet['subject']) and (not self.triplet['object']) :
                 result.append(triplet)
         self.relations_triplets = result
         return result
@@ -69,7 +66,6 @@ for token in analyzed_page:
     extractor.step(token)
 result = extractor.extract_valid_triplets()
 
-for i in range(3):
-    triplet = result[i]
-    print("-------i = "+str(i))
+for triplet in result:
+    print("----------------")
     print(triplet)
